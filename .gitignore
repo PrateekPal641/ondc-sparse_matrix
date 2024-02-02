@@ -160,3 +160,6 @@ cython_debug/
 #.idea/
 #extra files
 relation.csv
+#unwanted folders
+merchants
+pincodes

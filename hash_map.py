@@ -2,8 +2,9 @@ import pandas as pd
 import numpy as np
 import random
 import json
+from tqdm import tqdm
 # Set the scale for the demonstration
-num_merchants = 10000000
+num_merchants = 1000000
 num_pincodes = 30000
 
 # Generate merchant IDs and pincodes
@@ -14,11 +15,12 @@ while len(unique_pincodes) < num_pincodes:
 pincodes = list(unique_pincodes)
 
 
-relationship_dict = {}
+
 # Randomly assign some pincodes to each merchant to simulate the sparse nature
-for merchant in merchants:
-    num_served_pincodes = random.randint(100, 1000)  # Each merchant serves between 1 to 10 pincodes for this demo
+for merchant in tqdm(merchants):
+    relationship_dict = {}
+    num_served_pincodes = random.randint(1, 10)  
     served_pincodes = random.sample(pincodes, num_served_pincodes)
     relationship_dict[merchant] = served_pincodes
-with open('relation.json', 'w') as f:
-    json.dump(f, relationship_dict)
+    with open('merchants/'+merchant+'.json', 'w') as f:
+        json.dump(relationship_dict, f)
