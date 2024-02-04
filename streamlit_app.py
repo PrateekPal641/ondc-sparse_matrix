@@ -5,12 +5,14 @@ import random
 import json
 import logging
 import time
+from itertools import islice
+
 
 logging.basicConfig(level=logging.INFO)
 
 
 # Streamlit state to store data
-@st.cache(allow_output_mutation=True)
+@st.cache_data
 def get_state():
     return {}
 
@@ -73,12 +75,10 @@ def create_inverted_index():
 def search_pincode(pincode):
     logging.info("Start search data ...")
     if 'inverted_index' in state:
-        inverted_index = state['inverted_index']
-
-        if pincode in inverted_index:
+        if pincode in state['inverted_index']:
             st.success(f"Pincode {pincode} is servicable.")
             st.subheader("Merchants serving this pincode:")
-            merchants_list = inverted_index[pincode]
+            merchants_list = state['inverted_index'][pincode]
             for merchant in merchants_list:
                 st.markdown(f"- {merchant}")
         else:
@@ -137,8 +137,12 @@ tabs = st.tabs(["Relationships", "Search", "Insert"])
 # First tab: Relationships
 with tabs[0]:
     # Button to generate and save data
-    if st.button("Generate and Save Data"):
+
+    if "data_generated" not in state or state['data_generated'] == False :
+        st.info("Generating sample Sparse matrix for 10 Million Merchants and 30 Thousand pincodes.")
         generate_and_save_data()
+        st.info("Data representation done using hash map and inverted index for efficient search and insert operations.")
+        create_inverted_index()
         st.success("Data generated and saved successfully!")
         state['data_generated'] = True
 
@@ -169,22 +173,24 @@ with tabs[0]:
         matrix_df = pd.DataFrame(sparse_matrix, index=merchants, columns=pincodes)
         matrix_display.dataframe(matrix_df)
 
-        st.header("Generated Hash map !!")
-        # data_display = st.empty()
-        # data_content = "\n".join([f"{key}: {value}" for key, value in state['relationship_dict'].items()])
-        # data_display.text_area('', data_content, height=300, max_chars=0)
+        # st.header("Generated Hash map !!")
+        st.header("Representation for servicable Pinciodes of Merchants")
+        data_display = st.empty()
+        data_content = "\n".join([f"{key}: {value}" for key, value in islice(state['relationship_dict'].items(), 10)])
+        data_display.text_area('', data_content, height=300, max_chars=0)
     
     # Button to create inverted index (conditionally displayed)
-    if 'data_generated' in state and state['data_generated']:
-        if st.button("Generate Inverted Index"):
-            create_inverted_index()
+    # if 'data_generated' in state and state['data_generated']:
+    #     if st.button("Generate Inverted Index"):
+            
 
     # # Display the inverted index in a scrollable window with each key-value pair on a new line
-    if 'inverted_index' in state:
-        st.header("Generated Inverted Index !!")
-    #     inverted_index_display = st.empty()
-    #     inverted_index_content = "\n".join([f"{key}: {value}" for key, value in state['inverted_index'].items()])
-    #     inverted_index_display.text_area('', inverted_index_content, height=300, max_chars=0)
+    # if 'inverted_index' in state:
+    #     st.header("Generated Inverted Index !!")
+        st.header("Representation for Merchants servicing at a particular Pinciode")
+        inverted_index_display = st.empty()
+        inverted_index_content = "\n\n".join([f"{key}: {value}" for key, value in islice(state['inverted_index'].items(),5)])
+        inverted_index_display.text_area('', inverted_index_content, height=300, max_chars=0)
 
 # Second tab: Search
 with tabs[1]:
