@@ -32,7 +32,7 @@ class PincodeTrie:
 
 # Example demonstrating differentiation
 trie = PincodeTrie()
-trie.insert("234566", "Merchant1")
+trie.insert("234566", "Merchant_1")
 trie.insert("234567", "Merchant2")
 
 exists, merchants = trie.search("234566")

@@ -75,8 +75,8 @@ with tabs[0]:
         print("here")
         state['flag'] = True
 
-        num_merchants = 100
-        num_pincodes = 300
+        num_merchants = 10000000
+        num_pincodes = 30000
 
         st.info("Generating sample data for 10 Million Merchants and 30 Thousand pincodes.")
         # Generate merchant IDs and pincodes
@@ -113,7 +113,8 @@ with tabs[1]:
     pincode_input = st.text_input("Enter Pincode to search:")
     if st.button("Search"):
         if validate_pincode_format(pincode=pincode_input) is True:
-            exists, merchants = st.session_state.trie.search("pincode_input")
+            print(pincode_input)
+            exists, merchants = st.session_state.trie.search(pincode_input)
             if exists:
                 st.success(f"Pincode {pincode_input} is servicable.")
                 st.subheader("Merchants serving this pincode:")

@@ -163,3 +163,4 @@ relation.csv
 #unwanted folders
 merchants
 pincodes
+trie_data.pkl

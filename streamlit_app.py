@@ -22,7 +22,7 @@ state = get_state()
 def generate_and_save_data():
     logging.info("Start generating data ...")
     # Set the scale for the demonstration
-    num_merchants = 10000000
+    num_merchants = 1000000
     num_pincodes = 30000
 
     # Generate merchant IDs and pincodes
