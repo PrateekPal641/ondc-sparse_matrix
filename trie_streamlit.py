@@ -67,13 +67,19 @@ st.title("Merchant-Pincodes Relationship and Search")
 
 # Create tabs
 tabs = st.tabs(["Relationships", "Search", "Insert"])
- 
+
+empty_df = pd.DataFrame()
 if 'trie' not in st.session_state:
     st.session_state.trie = PincodeTrie()
+    st.session_state.merchants = list()
+    st.session_state.pincodes = list()
+    st.session_state.df = empty_df
+    st.session_state.relationship_dict = dict()
 
 # First tab: Relationships
 with tabs[0]:
     # Button to generate and save data
+
     if state['flag'] is False:
         print("here")
         state['flag'] = True
@@ -82,22 +88,27 @@ with tabs[0]:
         num_pincodes = 30000
 
         st.info("Generating sample data for 10 Million Merchants and 30 Thousand pincodes.")
+        st.info("Please Wait while data is generated!!")
         # Generate merchant IDs and pincodes
-        merchants = [f"Merchant_{i+1}" for i in range(num_merchants)]
+        st.session_state.merchants = [f"Merchant_{i+1}" for i in range(num_merchants)]
         unique_pincodes = set()
         while len(unique_pincodes) < num_pincodes:
             unique_pincodes.add(str(random.randint(100000, 999999)))
-        pincodes = list(unique_pincodes)
+        st.session_state.pincodes = list(unique_pincodes)
 
 
 
         # Randomly assign some pincodes to each merchant to simulate the sparse nature
-        for merchant in merchants:
-            relationship_dict = {}
+        data = []
+        for merchant in st.session_state.merchants:
+            st.session_state.relationship_dict[merchant] = []
             num_served_pincodes = random.randint(1, 10)  
-            served_pincodes = random.sample(pincodes, num_served_pincodes)
+            served_pincodes = random.sample(st.session_state.pincodes, num_served_pincodes)
             for pincode in served_pincodes:
                 st.session_state.trie.insert(str(pincode), merchant)
+                st.session_state.relationship_dict[merchant].append(pincode)
+        
+        
 
 
         # with open('trie_data.pkl', 'wb') as file:
@@ -107,7 +118,21 @@ with tabs[0]:
         st.info("Data representation done using linked lists with merchant Ids at leaf nodes and Pincode digits at different codes connected as per different combinations")
        
     st.success("DATA IS READY!! TRY SEARCH AND INSERT OPERATIONS")
-        
+    st.info("Sample data you can try seraching...")
+
+    for i, (merchant, pincode_list) in enumerate(st.session_state.relationship_dict.items()):
+        if i >= 5:
+            break
+        st.subheader(f"Merchant: {merchant}")
+        st.write("Pincodes:")
+        for pincode in pincode_list[:5]:
+            st.write(pincode)
+        st.write("-------")
+
+
+    
+    
+
 
    
 # Second tab: Search
@@ -131,7 +156,9 @@ with tabs[1]:
 with tabs[2]:
     st.header("Insert Merchant-Pincode Pair")
     merchant_input = st.text_input("Enter Merchant:")
+    st.info(f"Example Format to Insert Merchant_Id: Merchant_4")
     pincode_input_insert = st.text_input("Enter servicable Pincode:")
+    st.info(f"Example Format to Insert Pincode(6-digit): 234156")
     if st.button("Insert"):
         if validate_merchant_format(merchant=merchant_input) is False or validate_pincode_format(pincode=pincode_input_insert)is False:
             st.warning("Please enter correct MerchantId and Pincode.")
