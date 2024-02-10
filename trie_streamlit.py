@@ -10,14 +10,7 @@ from itertools import islice
 
 logging.basicConfig(level=logging.INFO)
 
-# Streamlit state to store data
-@st.cache(allow_output_mutation=True)
-def get_state():
-    state = {}
-    state['flag'] = False
-    return state
 
-state = get_state()
 
 class TrieNode:
     def __init__(self):
@@ -51,6 +44,16 @@ class PincodeTrie:
         # Return both the existence of the pincode and the set of merchants at the leaf node
         return node.isEndOfPincode, node.merchantIDs
 
+# Streamlit state to store data
+@st.cache(allow_output_mutation=True)
+def get_state():
+    state = {}
+    state['flag'] = False
+    state['trie'] = PincodeTrie()
+    return state
+
+state = get_state()
+
 # Function to validate merchant format
 def validate_merchant_format(merchant):
     return merchant.startswith("Merchant_") and merchant[9:].isdigit()
@@ -75,7 +78,7 @@ with tabs[0]:
         print("here")
         state['flag'] = True
 
-        num_merchants = 10000000
+        num_merchants = 1000000
         num_pincodes = 30000
 
         st.info("Generating sample data for 10 Million Merchants and 30 Thousand pincodes.")
@@ -97,8 +100,8 @@ with tabs[0]:
                 st.session_state.trie.insert(str(pincode), merchant)
 
 
-        with open('trie_data.pkl', 'wb') as file:
-            pickle.dump(st.session_state.trie, file)
+        # with open('trie_data.pkl', 'wb') as file:
+        #     pickle.dump(st.session_state.trie, file)
             
         
         st.info("Data representation done using linked lists with merchant Ids at leaf nodes and Pincode digits at different codes connected as per different combinations")
@@ -113,7 +116,6 @@ with tabs[1]:
     pincode_input = st.text_input("Enter Pincode to search:")
     if st.button("Search"):
         if validate_pincode_format(pincode=pincode_input) is True:
-            print(pincode_input)
             exists, merchants = st.session_state.trie.search(pincode_input)
             if exists:
                 st.success(f"Pincode {pincode_input} is servicable.")
@@ -135,7 +137,7 @@ with tabs[2]:
             st.warning("Please enter correct MerchantId and Pincode.")
         else:
             if merchant_input and pincode_input_insert:
-                st.session_state.trie.insert("234567", "Merchant2")
+                st.session_state.trie.insert(pincode_input_insert, merchant_input)
                 st.success(f"Successfully added Pincode {pincode_input_insert} and Merchnat {merchant_input}.")
             else:
                 st.warning("Please enter both Merchant and Pincode.")
